@@ -31,9 +31,9 @@ We know that our `L` will start at the 0th index and `R` will start at 7th index
 
 44 is less than 55, indicating that we need to look for a larger number, and since the array is sorted, the larger numbers reside on the right. Therefore, we need to move our `L` to `mid + 1`, which determines our lower boundry. The `R` pointer stays where it is.
 
-On the next iteration, calculating `mid` gives us 55. Looking at the 5th index, now our element, 66, is greater than 55. Therefore, our `R` needs to move to `mid - 1` since we need to look for a smaller element. The `L` pointer points to the 4th index and `R` pointer also points to the 4th index. The new `mid` results in 44 and indeed, our target exists at the 4th index, so we can return `mid`.
+On the next iteration, calculating `mid` gives us 55. Looking at the 5th index, now our element, 66, is greater than 55. Therefore, our `R` needs to move to `mid - 1` since we need to look for a smaller element. The `L` pointer points to the 4th index and `R` pointer also points to the 4th index. The new `mid` results in 4 and indeed, our target exists at the 4th index, so we can return `mid`.
 
-![image-20230928193308501](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928193308501.png)
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/84ece94d-88ad-4e76-9361-fde39487d800/sharpen=1)
 
 A better formula for calculating the `mid` value is `L + (R - L)\ /\ 2`. This formula guarentees that our `mid` doesn't exceed the maximum integer value but also making sure that it isn't negative. This article from [Google Research](https://ai.googleblog.com/2006/06/extra-extra-read-all-about-it-nearly.html) provides an intuitive explanation.
 
@@ -43,7 +43,7 @@ Let's dig a little deeper into what happens if our `target` does not exist in th
 
 Our left pointer would end up out of bounds.
 
-![image-20230928193541295](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928193541295.png)
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/719bef09-3014-4649-f7a2-745eee643800/sharpen=1)
 
 ### Time Space Complexity
 
@@ -110,6 +110,50 @@ The work being done is the same as the previous section, which is standard binar
 
 
 
+### Past Year Paper Question:
+
+**<u>2122 Sem1 Part2:</u>**
+
+```python
+def local_peak_function_version(a:int, b:int,survey:callable) -> int:   
+    """Perform a binary search to find the index of a local peak in a list of integers
+    Args:
+        a (int): left bound of the search range
+        b (int): right bound of the search range
+        survey (callable): a callable function that generates a list of integers
+    Returns:
+        int: returns a value of local peak
+    """
+    
+    #initialise the left and right pointers
+    l , r = a , b-1
+    
+    # base case
+    if a==b: 
+        return a
+    
+    # leftmost
+    if r > l and survey(a)>survey(a+1):
+        return a
+    #rightmost
+    if b >= 1 and survey(b) > survey(b-1):
+        return b
+    # entering the binary search
+    while l <= r:
+        m = (l+r) // 2 
+        
+        if survey(m) >= survey(m-1) and survey(m) >= survey(m+1):
+            return m
+        elif survey(m-1) >= survey(m):
+            r = m-1
+        else:
+            l = m+1
+                
+    return None
+```
+
+
+
 
 
 
@@ -146,7 +190,7 @@ def insertionSort(arr):
 
 ```
 
-![image-20230928194902193](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928194902193.png)
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/f6edc4d8-ebbe-4276-a4d6-b7272268dd00/sharpen=1)
 
 ### Stability
 
@@ -172,7 +216,7 @@ The concept behind merge sort is very simple. Keep splitting the array into halv
 
 Let's take an array of size 55 as an example, `[3,2,4,1,6]`. Our job is to make sure that we sort this in an increasing, or non-decreasing order if we had duplicates. We will be splitting the array like the following.
 
-<img src="/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928200812074.png" alt="image-20230928200812074" style="zoom:50%;" />
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/55728d04-816e-4176-985c-e82da4112b00/sharpen=1)
 
 As observed, we have two branches. Let's work on sorting and merging the left branch first. The work required here is that we will have to hit the base case first, after which we can begin sorting and merging the arrays together, achieving `[2,3,4]` as a result. Once our recursion reaches the base case, we have two subarrays, `[3]` and `[2]`. We need a way to compare these two elements to know where to put them in their original subarray, which is `[3,2]`. For this, copies of both the subarrays is created and using two-pointers, values are compared and put in the original subarray in the sorted order. This can be seen in the pseudocode below.
 
@@ -202,7 +246,9 @@ def mergeSort(arr, s, e):
 
 As we learned with two branch recursion, we solve both the branches and 'piece' back together the solutions to the subproblems to arrive at the ultimate solution. Once we have the subarray `[3,2]` sorted to `[2,3]` - this is the `mergeSort(arr, s, m)` part. Now, we can move on to sorting the `[4]`, which corresponds to the `mergeSort(arr, m + 1, e)`. It is important to note the sequence in which the calls are executed. The `merge()` call will not be executed until both the recursive `mergeSort()` calls have returned for the current subarray. The first visual below shows sorting and merging the left half. The second visual shows sorting and merging the second half to get the ultimate sorted array.
 
-![image-20230928201135629](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928201135629.png)
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/23d6fbdf-2fe5-4ff6-2c55-473b789a9600/sharpen=1)
+
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/d497f50f-b72f-4038-06e3-fbbf60ac1000/sharpen=1)
 
 #### The `merge()` function and three pointers
 
@@ -278,11 +324,11 @@ $x = logn$
 
 Having solved for $x$, our resulting answer is  $logn$which is the complexity for the `mergeSort` recursive call. We are not done yet, however.
 
-Let's analyze the `merge` subroutine. The merge subroutine will take $n$ steps because at any level of the tree, we have  $n$elements to compare and sort, where �*n* is the length of the original array.
+Let's analyze the `merge` subroutine. The merge subroutine will take $n$ steps because at any level of the tree, we have  $n$elements to compare and sort, where $n$ is the length of the original array.
 
 This results in a $O(n log n)$time complexity. The visual below gives more detail on how we arrived to our result. 
 
-![image-20230928203845793](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928203845793.png)
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/600da4fb-21e7-4559-af19-afb78ec85100/sharpen=1)
 
 ### Stability
 
@@ -330,7 +376,7 @@ Let's take the array `[6,2,4,1,3]` to sort.
 
 ### Performing a partition
 
-![image-20230928204509482](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928204509482.png)
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/4807fbac-d636-4b43-654d-345988be0500/sharpen=1)
 
 As seen above, in the resulting array, we will have sorted the array such that all elements to the left are smaller than the `pivot` with the rest being on the right.
 
@@ -430,7 +476,7 @@ At the first iteration, $n = 0$, which corresponds to 2 in `counts`. Our inner l
 
 
 
-![image-20230928205129870](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230928205129870.png)
+![alt text](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/1521e7e2-4f63-4326-38cd-f32bcd9d3400/sharpen=1)
 
 #### Time Complexity
 
@@ -639,13 +685,13 @@ To visualize the above on our matrix, we can break down our algorithm into findi
 
 ### 1. Find the first unique path
 
- 
+![recursive-dfs](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/7717e227-5da3-4b91-fe73-b25065d78c00/sharpen=1) 
 
 ### 2. Backtrack to find another potential unique path
 
 > The red dotted line represents another unique path which is reached from `matrix[0][3]`.
 
- ![image-20230929164335947](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929164335947.png)
+ ![recursive-dfs](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/c1fd94d4-7a68-4e8d-4f91-5a5f3ec92c00/sharpen=1)
 
 Our function returns 22, denoting there exist 22 unique paths from `(0,0)` to `(3,3)`.
 
@@ -817,5 +863,94 @@ class Solution:
                 area = max(area, dfs(r, c))
         return area
 
+```
+
+
+
+### Past Year Paper Questions:
+
+**<u>2223 Sem2 Part 3:</u>**
+
+In the first example map0, there are two independent islands with perimeters 8 and 6 respectively. Hence, the maximum perimeter of all the islands on that map is 8. In this task, write a function max_island_perimeter(mp) which returns the maximum island perimeter of map mp. 
+
+Note that two land squares belong to the same island if and only if they are connected horizontally or vertically, but NOT diagonally. For instance, map1 has three islands as shown on the right, and the lower right inverted U-shaped island gives the maximum island perimeter of 14. If there is no island/land in the map, return 0. 
+
+```python
+def max_island_perimeter(mp:list) -> int:
+      row = len(mp)
+      col = len(mp[0])
+      perimeter = 0
+      visited = set()
+      
+      def dfs(r,c):
+            if r not in range(row) or c not in range(col) \
+               or mp[r][c] == 0: return 1 # the perimeter depends on the number of neighboring 0s
+            if (r,c) in visited: return 0
+            if mp[r][c] == 1:
+                  visited.add((r,c))
+                  return dfs(r-1,c) + dfs(r+1,c) + dfs(r,c-1) + dfs(r,c+1) # recursive
+            return 0
+      for r in range(row):
+            for c in range(col):
+                  if mp[r][c] == 1:
+                        perimeter = max(perimeter, dfs(r,c))
+         
+      return perimeter
+```
+
+2122 Sem2 Part4:
+
+```python
+def build_graph(map_data: list):
+    graph = {}
+    for line in map_data:
+        locations = line.split()
+        if len(locations) >= 2:
+            start, *rest = locations  # Get the first element as start and the rest as destinations
+            if start not in graph:
+                graph[start] = []
+            graph[start].extend(rest)  # Add destinations to the graph
+    return graph
+
+def find_paths_dfs(graph:dict, current:str, goal:str, visited:set, path:list, paths:list)-> int:
+    visited.add(current)
+    path.append(current)
+
+    if current == goal:
+        paths.append(path.copy())
+    else:
+        for neighbor in graph.get(current, []):
+            for neighbor in graph.get(current, []):
+                if neighbor in path:
+                    # Backtrack by removing the current node from the path
+                    path.pop()
+                else:
+                    # Recursively explore the neighbor
+                    find_paths_dfs(graph, neighbor, goal, visited, path, paths)
+
+
+
+def strategic_count(mapfile:str, start_location:str='CountryA', goal_location:str='capitalB'):
+    with open(mapfile, 'r') as file:
+        map_data =  [line.strip() for line in file] # this will contain a list of all the lines in the file
+    
+    graph = build_graph(map_data)
+    visited = set()
+    paths, path = [], [] # how to get to the goal
+    find_paths_dfs(graph, start_location, goal_location, visited, path, paths)
+    
+    
+    if paths:
+        return len(paths)
+    else:
+        return 0
+    
+   
+paths contains the following:
+[['CountryA', 'VillageA', 'BuildingD', 'capitalB'],
+ ['CountryA', 'VillageA', 'TowerE', 'capitalB'],
+ ['CountryA', 'IntersectionB', 'TowerE', 'capitalB'],
+ ['CountryA', 'IntersectionB', 'BuildingD', 'capitalB']]
+    
 ```
 
