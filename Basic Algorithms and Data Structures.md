@@ -954,3 +954,247 @@ paths contains the following:
     
 ```
 
+
+
+
+
+## Matrix BFS
+
+The type of graph questions where BFS will shine is usually when the question asks us to find the **<u>shortest path.</u>**
+
+> Q: Find the length of the shortest path from top left of the grid to the bottom right.
+
+We can also use DFS to do this but it is more brute-force. BFS is more efficient since the first time a vertex is discovered during the traversal, the distance from our source would give us the shortest path. Let us see the set up of the code, given the following matrix.
+
+```python
+# Matrix (2D Grid)
+grid = [[0, 0, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 1, 0, 0]]
+
+```
+
+### The initial set up
+
+Similar to the previous chapter, we take the dimensions of our row and columns, which tells us where our bounds are. We will use a set to keep track of visited vertices. We will use a deque (deck) to keep track of all visited vertices at each level and determine what level we are at currently. We can initialize our deque to the first vertex, `(0, 0)` and mark it as visited. This is our starting point.
+
+
+
+```python
+def bfs(grid):
+    ROWS, COLS = len(grid), len(grid[0])
+    visit = set()
+    queue = deque()
+    queue.append((0, 0))
+    visit.add((0, 0))
+
+```
+
+### BFS on the graph
+
+We are asked to find the length of the shortest path. After our initial set up, we can initialize a `length` variable to `0`. Then, just like BFS on trees, we can run a while loop for our queue and take a snapshot of the length of the queue. Here, when we pop from our queue, we get a `r` (row) and `c` (column). With trees, the next step was to visit the children of the popped node. Here, we visit the neighbors of the popped vertex. We will only have to do this if we have not already reached the bottom right, which is when `r == ROWS - 1` and `c == COLS - 1`.
+
+In the best case, we might be able to move in all four directions without going out of bounds. For this, we can keep a 2-D array - `neighbors = [[0, 1], [0, -1], [1, 0], [-1, 0]]`. Though not technically the neighbors, the array just represents the directions we can move in - right, left, up, down, respectively.
+
+The code in the `if` statement is the same as what we had in DFS. If we are out of bounds, the coordinate is blocked or the vertex is already visited, we continue to the next iteration. Otherwise, we append all the neighbors to the queue and add them to the hashset to ensure we don't visit them again. Notice how we add to the hashset as soon as we append to the queue. This way, we will never have the same element occur twice in our queue, which helps in making it more efficient in time complexity, which we will discuss later. The next piece of code after the initial setup looks like this.
+
+```python
+length = 0
+while queue:
+    for i in range(len(queue)):
+        r, c = queue.popleft()
+        if r == ROWS - 1 and c == COLS - 1:
+            return length
+
+        neighbors = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+        for dr, dc in neighbors:
+            if (min(r + dr, c + dc) < 0 or
+                r + dr == ROWS or c + dc == COLS or
+                (r + dr, c + dc) in visit or grid[r + dr][c + dc] == 1):
+                continue
+            queue.append((r + dr, c + dc))
+            visit.add((r + dr, c + dc))
+    length += 1
+
+```
+
+Tying it all together, we will end up with the following.
+
+```python
+# Shortest path from top left to bottom right
+def bfs(grid):
+    ROWS, COLS = len(grid), len(grid[0])
+    visit = set()
+    queue = deque()
+    queue.append((0, 0))
+    visit.add((0, 0))
+
+    length = 0
+    while queue:
+        for i in range(len(queue)):
+            r, c = queue.popleft()
+            if r == ROWS - 1 and c == COLS - 1:
+                return length
+
+            neighbors = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+            for dr, dc in neighbors:
+                if (min(r + dr, c + dc) < 0 or
+                    r + dr == ROWS or c + dc == COLS or
+                    (r + dr, c + dc) in visit or grid[r + dr][c + dc] == 1):
+                    continue
+                queue.append((r + dr, c + dc))
+                visit.add((r + dr, c + dc))
+        length += 1
+
+```
+
+We can visualize this algorithm applied to our matrix below. The numbers and circles in the same color represent the length of the path at that specific vertex.
+
+![matrixbfs](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/8a6996dc-78e0-45ac-bd1e-b06afc6ade00/sharpen=1)
+
+### Time Complexity
+
+Since we are never visiting a coordinate twice, in the worst case, we end up visiting each coordinate at most once. If $n$ is the number of rows and $m$ is the number of columns, this gives us a time complexity of $O(n*M)$
+
+
+
+### Leetcode Quesstion 1091. Shortest Path in Binary Matrix
+
+Given an `n x n` binary matrix `grid`, return *the length of the shortest **clear path** in the matrix*. If there is no clear path, return `-1`.
+
+A **clear path** in a binary matrix is a path from the **top-left** cell (i.e., `(0, 0)`) to the **bottom-right** cell (i.e., `(n - 1, n - 1)`) such that:
+
+- All the visited cells of the path are `0`.
+- All the adjacent cells of the path are **8-directionally** connected (i.e., they are different and they share an edge or a corner).
+
+The **length of a clear path** is the number of visited cells of this path.
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2021/02/18/example1_1.png)
+
+```python
+Input: grid = [[0,1],[1,0]]
+Output: 2
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2021/02/18/example2_1.png)
+
+```python
+Input: grid = [[0,0,0],[1,1,0],[1,1,0]]
+Output: 4
+```
+
+**Example 3:**
+
+```python
+Input: grid = [[1,0,0],[1,1,0],[1,1,0]]
+Output: -1
+```
+
+
+
+````python
+class Solution:
+    def shortestPathBinaryMatrix(self, grid: List[List[int]]) -> int:
+        N = len(grid)
+        q = deque([(0, 0, 1)]) # r, c, length
+        visit = set((0, 0))
+        direct = [[0, 1], [1, 0], [0, -1], [-1, 0],
+                  [1, 1], [-1, -1], [1, -1], [-1, 1]]
+        while q:
+            r, c, length = q.popleft()
+            if (min(r, c) < 0 or max(r, c) >= N or
+                grid[r][c]):
+                continue
+            if r == N - 1 and c == N - 1:
+                return length
+            for dr, dc in direct:
+                if (r + dr, c + dc) not in visit:
+                    q.append((r + dr, c + dc, length + 1))
+                    visit.add((r + dr, c + dc))
+        return -1
+
+````
+
+
+
+### Leetcode Question 994. Rotting Oranges
+
+You are given an `m x n` `grid` where each cell can have one of three values:
+
+- `0` representing an empty cell,
+- `1` representing a fresh orange, or
+- `2` representing a rotten orange.
+
+Every minute, any fresh orange that is **4-directionally adjacent** to a rotten orange becomes rotten.
+
+Return *the minimum number of minutes that must elapse until no cell has a fresh orange*. If *this is impossible, return* `-1`.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2019/02/16/oranges.png)
+
+```
+Input: grid = [[2,1,1],[1,1,0],[0,1,1]]
+Output: 4
+```
+
+**Example 2:**
+
+```
+Input: grid = [[2,1,1],[0,1,1],[1,0,1]]
+Output: -1
+Explanation: The orange in the bottom left corner (row 2, column 0) is never rotten, because rotting only happens 4-directionally.
+```
+
+**Example 3:**
+
+```
+Input: grid = [[0,2]]
+Output: 0
+Explanation: Since there are already no fresh oranges at minute 0, the answer is just 0.
+```
+
+ ```python
+ class Solution:
+     def orangesRotting(self, grid: List[List[int]]) -> int:
+         q = collections.deque()
+         fresh = 0
+         time = 0
+ 
+         for r in range(len(grid)):
+             for c in range(len(grid[0])):
+                 if grid[r][c] == 1:
+                     fresh += 1
+                 if grid[r][c] == 2:
+                     q.append((r, c))
+ 
+         directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+         while fresh > 0 and q:
+             length = len(q)
+             for i in range(length):
+                 r, c = q.popleft()
+ 
+                 for dr, dc in directions:
+                     row, col = r + dr, c + dc
+                     # if in bounds and nonrotten, make rotten
+                     # and add to q
+                     if (
+                         row in range(len(grid))
+                         and col in range(len(grid[0]))
+                         and grid[row][col] == 1
+                     ):
+                         grid[row][col] = 2
+                         q.append((row, col))
+                         fresh -= 1
+             time += 1
+         return time if fresh == 0 else -1
+ 
+ ```
+
