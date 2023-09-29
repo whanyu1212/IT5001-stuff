@@ -475,7 +475,7 @@ The number of edges, $E$, given the number of vertices $V$ will always be less t
 
 If the pointers connecting the edges together have a direction, we call this a **directed graph.** If there are edges but no direction, this is referred to as an **undirected graph**. For example, trees and linked lists are directed graphs because we had pointers like `prev`, `next` and `left_child`, `right_child`.
 
-<img src="/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929162240866.png" alt="image-20230929162240866" style="zoom:50%;" />
+![hello](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/74daad67-5e27-476e-af6b-291ab5b80400/sharpen=1)
 
 ### Formats of Graphs in Interviews
 
@@ -501,7 +501,7 @@ How can this be used to represent a graph? As we mentioned, graphs are abstract 
 
 
 
-<img src="/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929163150367.png" alt="image-20230929163150367" style="zoom:50%;" />
+![hello](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/f3c04f37-7656-4836-f263-3ae19258c100/sharpen=1)
 
 ### Adjacency Matrix
 
@@ -534,7 +534,7 @@ adjMatrix[v2][v1] = 0
 
 To actualize the above adjacency matrix, we can look at the following visual.
 
-<img src="/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929163417514.png" alt="image-20230929163417514" style="zoom:50%;" />
+![hello](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/02f2aedd-88d5-461d-9fdd-0bffc2e81400/sharpen=1)
 
 The issue with this is that it is a giant memory hog. Because it is a square matrix, the time complexity is $O(V^2)$, where $V$ is the number of vertices. This makes sense since the number of edges is also equal to the number of nodes.
 
@@ -554,6 +554,8 @@ class GraphNode:
 ```
 
 This ends up being more space efficient because we only care about nodes that are connected.
+
+![hello](https://imagedelivery.net/CLfkmk9Wzy8_9HRyug4EVA/85b20b68-357a-4a6d-7c7a-e09256693200/sharpen=1)
 
 ## Matrix DFS
 
@@ -637,7 +639,7 @@ To visualize the above on our matrix, we can break down our algorithm into findi
 
 ### 1. Find the first unique path
 
- ![image-20230929164244446](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929164244446.png)
+ 
 
 ### 2. Backtrack to find another potential unique path
 
