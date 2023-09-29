@@ -457,3 +457,363 @@ Since we are overwriting the original array, there is no way to preserve the rel
 | Quick Sort     | $O(n log n)$          | Picking the largest or the smallest element as the pivot e.g. reverse sorted - $O(n^2)$ |
 | Bucket Sort    | $O(n)$                | Assuming you have a value within a specified range           |
 
+
+
+
+
+## Graphs
+
+(Not that important but may be helpful for understanding the application of Matrix DFS and BFS later on)
+
+### Graph Terminology
+
+In graphs, nodes are referred to as **vertices** and the pointers connecting these nodes are referred to as **edges**. There are no restrictions in graphs when it comes to where the nodes are placed, and how the edges connect those nodes together.
+
+It is also possible that the nodes are not connected by any edges and this would still be considered a graph - a null graph.
+
+The number of edges, $E$, given the number of vertices $V$ will always be less than or equal to $V^2$. $E<=V^2$ This is because each node can at most point to itself, and every other node in the graph. If we have a node `A`, `B` and `C`, `A` can point to itself, `B` and `C`. The same goes for `B` and `C`, so the rule checks out.
+
+If the pointers connecting the edges together have a direction, we call this a **directed graph.** If there are edges but no direction, this is referred to as an **undirected graph**. For example, trees and linked lists are directed graphs because we had pointers like `prev`, `next` and `left_child`, `right_child`.
+
+<img src="/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929162240866.png" alt="image-20230929162240866" style="zoom:50%;" />
+
+### Formats of Graphs in Interviews
+
+A graph can be represented in different ways. It is an abstract concept that is made concrete using different data structures. Most commonly, graphs are represented using the following:
+
+1. Matrix
+2. Adjacency Matrix
+3. Adjacency List
+
+### Matrix
+
+A matrix is a two-dimensional array with rows and columns, and a graph can be represented using a matrix. In the code below, each array, separated by commas, represents each row. Here we have four rows and four columns. Everything is indexed by 00 and the idea is that we should be able to access an arbitrary row, column, or a specific element given a specified row or column. Accessing the second row can simply be done by `grid[1]` and accessing the second column may be done by `grid[0][1]`.
+
+```python
+grid = [[0, 0, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 1, 0, 0]]
+
+```
+
+How can this be used to represent a graph? As we mentioned, graphs are abstract and can be defined in many ways. Let's say that all of the 0's in our grid are vertices. To traverse a graph, we are allowed to move up, down, left and right. If we are to connect the 0s together, using our edges, we would end up getting a bunch of connected zeroes, which are connected components, and that denotes a graph. We shall discuss matrix traversal in the next chapter.
+
+
+
+<img src="/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929163150367.png" alt="image-20230929163150367" style="zoom:50%;" />
+
+### Adjacency Matrix
+
+This is the less common input format. Here, the index of the array represents a vertex itself. Let's take an example:
+
+```python
+adjMatrix = [[0, 0, 0, 0],
+             [1, 1, 0, 0],
+             [0, 0, 0, 1],
+             [0, 1, 0, 0]]
+
+```
+
+Because the indices themselves represent a vertex, 00 denotes that an edge does not exist between a given `v1, v2`, and 11 denotes the opposite. `adjMatrix[1][2] == 0` means there is no edge between vertex `1` and `2`. Also, `adjMatrix[2][1] == 0` means there is no edge between vertex `2` and `1`. We can conclude the following from this:
+
+```python
+# an edge exists from v1 to v2
+adjMatrix[v1][v2] = 1
+
+# an edge exists from v2 to v1
+adjMatrix[v2][v1] = 1
+
+# No edge exists from v1 to v2
+adjMatrix[v1][v2] = 0
+
+# No edge exists from v2 to v1
+adjMatrix[v2][v1] = 0
+
+```
+
+To actualize the above adjacency matrix, we can look at the following visual.
+
+<img src="/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929163417514.png" alt="image-20230929163417514" style="zoom:50%;" />
+
+The issue with this is that it is a giant memory hog. Because it is a square matrix, the time complexity is $O(V^2)$, where $V$ is the number of vertices. This makes sense since the number of edges is also equal to the number of nodes.
+
+
+
+### Adjacency List
+
+These are typically the most common way of representing graphs. This is also a two dimensional array. The convenience here is that we can declare it using a class called `GraphNode` and it contains a list attribute called `neighbors`, using which we can access all of a given vertex's neighbor.
+
+```python
+# GraphNode used for adjacency list
+class GraphNode:
+    def __init__(self, val):
+        self.val = val
+        self.neighbors = []
+
+```
+
+This ends up being more space efficient because we only care about nodes that are connected.
+
+## Matrix DFS
+
+How do we go about applying DFS to graphs? This is best shown with an example.
+
+Suppose we are given the following question to solve:
+
+> Q: Count the unique paths from the top left to the bottom right. A single path may only move along 0's and can't visit the same cell more than once.
+
+```python
+matrix = [[0,0,0,0],
+          [1,1,0,0],
+          [0,0,0,1],
+          [0,1,0,0]]
+
+```
+
+In this problem, it is all a matter of choices. You might think of this as similar to backtracking and you would be right. We have mentioned before that DFS is recursive in nature and and we will be using recursion for this. Firstly, we need to think of our base case(s). Well, we know that we can move in all four directions except diagonally. This means that if we go out of bounds, we can return zero.
+
+We know that this will be a brute-force DFS with backtracking since at any point in our path, we might not have a valid way to reach the bottom right, in which case, we will have to backtrack.
+
+For starters, let's establish about our base cases. Since we are trying to find the number of unique paths, we need to keep count of the valid paths from each vertex.
+
+### The base cases
+
+#### 1. A unique path does not exist
+
+Since we are allowed to move in all four directions, it is possible that during our traversal, we end up going out of bounds. This means either our column, `c`, or our row, `r` becomes negative, or goes beyond the length of our matrix. It does not matter which of `r` and `c` goes out of bounds because we need a valid `c` **AND** a valid `r` to perform our search. We cannot perform a search on `matrix[-1][3]`.
+
+If we have already visited a coordinate, or the current coordinate is 1, then a valid path does not exist through that coordinate.
+
+So because a valid path does not exist in all of the aforementioned cases, we will return 0, which denotes absence of a unique path. We shall see this in our code soon.
+
+#### 2. A unique path does exist
+
+If we have not returned 00 from the first case, and we have reached the right-most column and the bottom-most row, it must be the case that we have found a valid path. Remember, our definition of a valid path is if a path exists from `matrix[0][0]` to `matrix[3][3]`. We can now return 11 and this will increment our count for the number of unique paths.
+
+
+
+### Implementation
+
+To ensure that we don't visit a coordinate more than once, we add it to a global HashSet, once visited.
+
+Then, at any given coordinate, we can recursively perform our DFS on `r+1`, `r-1`, `c+1` and `c-1`. If our recursive call returns 11, our `count` will be incremented and if it returns 00, adding it to count will make no difference.
+
+At each recursive call, we can remove all of the rows and columns that led us to an invalid path. This way, we can ensure to visit them again, but take a different direction and explore if a valid path exists from that direction.
+
+In the code below, we have our aforementioned base cases set up. We then add the current row and column to our set. Our count is initialized with 00 because we need to keep track of all the possible unique paths we have to our destination at any given vertex. Once our recursive calls return, we can remove the visited vertices from our set. Again, this is because they can be part of another unique path, just from a different source. So, when we backtrack, we can visit them again.
+
+```python
+# Matrix (2D Grid)
+grid = [[0, 0, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 0, 1],
+        [0, 1, 0, 0]]
+
+# Count paths (backtracking)
+def dfs(grid, r, c, visit):
+    ROWS, COLS = len(grid), len(grid[0])
+    if (min(r, c) < 0 or
+        r == ROWS or c == COLS or
+        (r, c) in visit or grid[r][c] == 1):
+        return 0
+    if r == ROWS - 1 and c == COLS - 1:
+        return 1
+
+    visit.add((r, c))
+
+    count = 0
+    count += dfs(grid, r + 1, c, visit)
+    count += dfs(grid, r - 1, c, visit)
+    count += dfs(grid, r, c + 1, visit)
+    count += dfs(grid, r, c - 1, visit)
+
+    visit.remove((r, c))
+    return count
+
+```
+
+To visualize the above on our matrix, we can break down our algorithm into finding the initial unique path, and then backtracking to find another potential unique path.
+
+### 1. Find the first unique path
+
+ ![image-20230929164244446](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929164244446.png)
+
+### 2. Backtrack to find another potential unique path
+
+> The red dotted line represents another unique path which is reached from `matrix[0][3]`.
+
+ ![image-20230929164335947](/Users/hanyuwu/Library/Application Support/typora-user-images/image-20230929164335947.png)
+
+Our function returns 22, denoting there exist 22 unique paths from `(0,0)` to `(3,3)`.
+
+### Time Complexity
+
+By now, we know that we only consider the worst case. In the worst case, we might need to visit every single row and column. At every coordinate, we can move in all four directions. Each one of the coordinates that are reached by moving in each those four directions will also be able to move up, down, left or right. We have four options from each position. If we are to create a decision tree out of this, each node will have at most four children. The tree has a branching factor of 44 and the height of the tree is the size of the matrix which is just $n*m$, where $n$ is the number of rows and $m$ is the number of columns.
+
+Therefore, we get $4^{nm}$
+
+> The space complexity will be the entire call stack since this is recursive. Therefore, it will be $O(n*m)$
+
+
+
+### Leetcode Question 200. Number of Islands
+
+Given an `m x n` 2D binary grid `grid` which represents a map of `'1'`s (land) and `'0'`s (water), return *the number of islands*.
+
+An **island** is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.
+
+**Example 1:**
+
+```
+Input: grid = [
+  ["1","1","1","1","0"],
+  ["1","1","0","1","0"],
+  ["1","1","0","0","0"],
+  ["0","0","0","0","0"]
+]
+Output: 1
+```
+
+**Example 2:**
+
+```
+Input: grid = [
+  ["1","1","0","0","0"],
+  ["1","1","0","0","0"],
+  ["0","0","1","0","0"],
+  ["0","0","0","1","1"]
+]
+Output: 3
+```
+
+```python
+## Using DFS
+
+class Solution:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        if not grid or not grid[0]:
+            return 0
+
+        islands = 0
+        visit = set()
+        rows, cols = len(grid), len(grid[0])
+
+        def dfs(r, c):
+            if (
+                r not in range(rows)
+                or c not in range(cols)
+                or grid[r][c] == "0"
+                or (r, c) in visit
+            ):
+                return
+
+            visit.add((r, c))
+            directions = [[0, 1], [0, -1], [1, 0], [-1, 0]]
+            for dr, dc in directions:
+                dfs(r + dr, c + dc)
+
+        for r in range(rows):
+            for c in range(cols):
+                if grid[r][c] == "1" and (r, c) not in visit:
+                    islands += 1
+                    dfs(r, c)
+        return islands
+
+
+
+
+```
+
+```python
+class SolutionBFS:
+    def numIslands(self, grid: List[List[str]]) -> int:
+        if not grid:
+            return 0
+
+        rows, cols = len(grid), len(grid[0])
+        visited=set()
+        islands=0
+
+         def bfs(r,c):
+             q = deque()
+             visited.add((r,c))
+             q.append((r,c))
+           
+             while q:
+                 row,col = q.popleft()
+                 directions= [[1,0],[-1,0],[0,1],[0,-1]]
+               
+                 for dr,dc in directions:
+                     r,c = row + dr, col + dc
+                     if (r) in range(rows) and (c) in range(cols) and grid[r][c] == '1' and (r ,c) not in visited:
+                       
+                         q.append((r , c ))
+                         visited.add((r, c ))
+
+         for r in range(rows):
+             for c in range(cols):
+               
+                 if grid[r][c] == "1" and (r,c) not in visited:
+                     bfs(r,c)
+                     islands +=1 
+
+         return islands
+```
+
+
+
+### LeetCode Question 695. Max Area of Island
+
+You are given an `m x n` binary matrix `grid`. An island is a group of `1`'s (representing land) connected **4-directionally** (horizontal or vertical.) You may assume all four edges of the grid are surrounded by water.
+
+The **area** of an island is the number of cells with a value `1` in the island.
+
+Return *the maximum **area** of an island in* `grid`. If there is no island, return `0`.
+
+
+
+**Example 1:**
+
+<img src="https://assets.leetcode.com/uploads/2021/05/01/maxarea1-grid.jpg" alt="img" style="zoom:50%;" />
+
+```
+Input: grid = [[0,0,1,0,0,0,0,1,0,0,0,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,1,1,0,1,0,0,0,0,0,0,0,0],[0,1,0,0,1,1,0,0,1,0,1,0,0],[0,1,0,0,1,1,0,0,1,1,1,0,0],[0,0,0,0,0,0,0,0,0,0,1,0,0],[0,0,0,0,0,0,0,1,1,1,0,0,0],[0,0,0,0,0,0,0,1,1,0,0,0,0]]
+Output: 6
+Explanation: The answer is not 11, because the island must be connected 4-directionally.
+```
+
+**Example 2:**
+
+```
+Input: grid = [[0,0,0,0,0,0,0,0]]
+Output: 0
+```
+
+```python
+class Solution:
+    def maxAreaOfIsland(self, grid: List[List[int]]) -> int:
+        ROWS, COLS = len(grid), len(grid[0])
+        visit = set()
+
+        def dfs(r, c):
+            if (
+                r < 0
+                or r == ROWS
+                or c < 0
+                or c == COLS
+                or grid[r][c] == 0
+                or (r, c) in visit
+            ):
+                return 0
+            visit.add((r, c))
+            return 1 + dfs(r + 1, c) + dfs(r - 1, c) + dfs(r, c + 1) + dfs(r, c - 1)
+
+        area = 0
+        for r in range(ROWS):
+            for c in range(COLS):
+                area = max(area, dfs(r, c))
+        return area
+
+```
+
